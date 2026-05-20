@@ -97,26 +97,8 @@ async function downloadFile(params, event, retryCount = 3) {
             const response = await axios(axiosConfig);
 
             const writer = fs.createWriteStream(fullPath);
-            let downloadedBytes = 0;
-            const totalBytes = parseInt(response.headers['content-length'] || '0', 10);
-
-            // 进度更新
-            response.data.on('data', (chunk) => {
-                downloadedBytes += chunk.length;
-                if (totalBytes > 0) {
-                    const progress = Math.round((downloadedBytes / totalBytes) * 100);
-                    if (event && event.sender) {
-                        event.sender.send('download-progress', {
-                            filePath,
-                            progress,
-                            downloadedBytes,
-                            totalBytes
-                        });
-                    }
-                }
-            });
-
-            // 管道传输
+            // 注意：单文件字节进度不再上报 download-progress 事件，
+            // 避免覆盖 fileHandler 发送的"总文件进度"
             response.data.pipe(writer);
 
             await new Promise((resolve, reject) => {

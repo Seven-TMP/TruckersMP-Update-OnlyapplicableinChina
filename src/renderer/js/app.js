@@ -42,7 +42,7 @@ const AppState = {
 
     // 渲染按钮状态
     renderButtons() {
-        const buttons = document.querySelectorAll('.btn-action');
+        const buttons = document.querySelectorAll('.action-card');
         const isBusy = this.current === this.State.LOADING ||
             this.current === this.State.PROCESSING ||
             this.isUpdating;
@@ -60,17 +60,22 @@ const AppState = {
     // 渲染状态
     renderStatus() {
         const statusEl = document.getElementById('appStatus');
-        if (statusEl) {
-            const stateInfo = {
-                [this.State.IDLE]: { icon: '⚡', text: '就绪', color: '#48bb78' },
-                [this.State.LOADING]: { icon: '⏳', text: '加载中...', color: '#ed8936' },
-                [this.State.PROCESSING]: { icon: '🔄', text: '处理中...', color: '#4299e1' },
-                [this.State.SUCCESS]: { icon: '✅', text: '成功', color: '#48bb78' },
-                [this.State.ERROR]: { icon: '❌', text: '错误', color: '#f56565' }
-            };
-            const info = stateInfo[this.current] || stateInfo[this.State.IDLE];
-            statusEl.innerHTML = `<span style="color: ${info.color}">${info.icon} ${info.text}</span>`;
-        }
+        if (!statusEl) return;
+
+        const stateInfo = {
+            [this.State.IDLE]: { dotClass: 'idle', text: '就绪' },
+            [this.State.LOADING]: { dotClass: 'loading', text: '加载中' },
+            [this.State.PROCESSING]: { dotClass: 'processing', text: '处理中' },
+            [this.State.SUCCESS]: { dotClass: 'success', text: '完成' },
+            [this.State.ERROR]: { dotClass: 'error', text: '错误' }
+        };
+        const info = stateInfo[this.current] || stateInfo[this.State.IDLE];
+
+        // 只更新内部结构，保留容器样式
+        statusEl.innerHTML = `
+            <span class="status-dot ${info.dotClass}"></span>
+            <span>${info.text}</span>
+        `;
     }
 };
 
@@ -130,23 +135,27 @@ const UIManager = {
     updateProgress(percent, currentFile = '', current = 0, total = 0) {
         const progressBar = document.getElementById('progressBar');
         const progressPercent = document.getElementById('progressPercent');
+        const progressCount = document.getElementById('progressCount');
         const currentFileEl = document.getElementById('currentFile');
 
         if (progressBar) {
             progressBar.style.width = `${percent}%`;
-            progressBar.style.transition = 'width 0.3s ease';
         }
 
         if (progressPercent) {
             progressPercent.textContent = `${percent}%`;
         }
 
+        if (progressCount) {
+            progressCount.textContent = total > 0 ? `${current} / ${total}` : '准备中';
+        }
+
         if (currentFileEl) {
-            if (current > 0 && total > 0) {
-                currentFileEl.textContent = `正在处理: ${currentFile} (${current}/${total})`;
-            } else {
-                currentFileEl.textContent = currentFile ? `当前文件: ${currentFile}` : '';
-            }
+            // 只保留文件路径（去掉前缀的 /data 等），更紧凑
+            const display = currentFile
+                ? currentFile.replace(/^[\/\\]/, '').replace(/^tmp_file[\/\\]/, '')
+                : '';
+            currentFileEl.textContent = display || '正在处理...';
         }
     },
 
@@ -200,7 +209,7 @@ const UIManager = {
 
         item.innerHTML = `
             <div class="file-info">
-                <span class="file-name" title="${file.filePath}">${window.window.Utils.truncate(file.filePath, 60)}</span>
+                <span class="file-name" title="${file.filePath}">${window.Utils.truncate(file.filePath, 60)}</span>
                 <span class="file-badge ${isOldVersion ? 'badge-old' : 'badge-new'}">
                     ${isOldVersion ? '旧版' : '新版'}
                 </span>
@@ -231,11 +240,8 @@ const UIManager = {
     // 启用/禁用所有操作按钮
     setButtonsEnabled(enabled) {
         const buttons = [
-            'btnGetFiles',
-            'btnCheckPerm',
             'btnUpdateNew',
-            'btnUpdateOld',
-            'btnQuickUpdate'
+            'btnUpdateOld'
         ];
 
         buttons.forEach(btnId => {
@@ -271,7 +277,7 @@ const EventHandlers = {
 
         if (minimizeBtn) {
             minimizeBtn.addEventListener('click', async () => {
-                await window.window.API.minimizeWindow();
+                await window.API.minimizeWindow();
             });
         }
 
@@ -314,34 +320,16 @@ const EventHandlers = {
 
     // 操作按钮
     setupActionButtons() {
-        // 获取文件列表
-        const btnGetFiles = document.getElementById('btnGetFiles');
-        if (btnGetFiles) {
-            btnGetFiles.addEventListener('click', () => this.handleGetFiles());
-        }
-
-        // 检查权限
-        const btnCheckPerm = document.getElementById('btnCheckPerm');
-        if (btnCheckPerm) {
-            btnCheckPerm.addEventListener('click', () => this.handleCheckPermissions());
-        }
-
-        // 更新新版
+        // 更新新版（自动获取文件列表）
         const btnUpdateNew = document.getElementById('btnUpdateNew');
         if (btnUpdateNew) {
             btnUpdateNew.addEventListener('click', () => this.handleUpdateFiles('new'));
         }
 
-        // 更新旧版
+        // 更新旧版（自动获取文件列表）
         const btnUpdateOld = document.getElementById('btnUpdateOld');
         if (btnUpdateOld) {
             btnUpdateOld.addEventListener('click', () => this.handleUpdateFiles('old'));
-        }
-
-        // 快速更新
-        const btnQuickUpdate = document.getElementById('btnQuickUpdate');
-        if (btnQuickUpdate) {
-            btnQuickUpdate.addEventListener('click', () => this.handleQuickUpdate());
         }
     },
 
@@ -484,19 +472,44 @@ const EventHandlers = {
         }
     },
 
-    // 更新文件
+    // 更新文件（自动获取文件列表）
     async handleUpdateFiles(versionType) {
-        if (AppState.fileList.length === 0) {
-            UIManager.showStatus('请先获取文件列表', 'warning');
-            return;
-        }
-
         const targetDir = versionType === 'new'
             ? (AppState.newDir || document.getElementById('newDirInput').value)
             : (AppState.oldDir || document.getElementById('oldDirInput').value);
 
         if (!targetDir) {
             UIManager.showStatus('请先选择目录', 'warning');
+            return;
+        }
+
+        // 自动获取文件列表（如果还没有）
+        if (AppState.fileList.length === 0) {
+            AppState.setState(AppState.State.LOADING);
+            UIManager.setButtonsEnabled(false);
+            UIManager.showStatus('正在获取文件列表...', 'info');
+            try {
+                const result = await window.API.fetchFileList();
+                if (result.success) {
+                    AppState.fileList = result.data || [];
+                    UIManager.renderFileList(AppState.fileList);
+                } else {
+                    UIManager.showStatus(result.message || '获取文件列表失败', 'error');
+                    AppState.setState(AppState.State.ERROR);
+                    UIManager.setButtonsEnabled(true);
+                    return;
+                }
+            } catch (error) {
+                UIManager.showStatus(`获取文件列表失败: ${error.message}`, 'error');
+                AppState.setState(AppState.State.ERROR);
+                UIManager.setButtonsEnabled(true);
+                return;
+            }
+        }
+
+        if (AppState.fileList.length === 0) {
+            UIManager.showStatus('文件列表为空，无法更新', 'warning');
+            UIManager.setButtonsEnabled(true);
             return;
         }
 
@@ -522,7 +535,7 @@ const EventHandlers = {
                 AppState.setState(AppState.State.SUCCESS);
             } else {
                 UIManager.showStatus(result.message, 'warning');
-                AppState.setState(AppState.State.WARNING || AppState.State.SUCCESS);
+                AppState.setState(AppState.State.SUCCESS);
             }
         } catch (error) {
             UIManager.showStatus(`更新失败: ${error.message}`, 'error');
@@ -536,33 +549,6 @@ const EventHandlers = {
         }
     },
 
-    // 快速更新（检查权限后一键更新）
-    async handleQuickUpdate() {
-        if (AppState.fileList.length === 0) {
-            UIManager.showStatus('请先获取文件列表', 'warning');
-            return;
-        }
-
-        const newDir = AppState.newDir || document.getElementById('newDirInput').value;
-        const oldDir = AppState.oldDir || document.getElementById('oldDirInput').value;
-
-        if (!newDir || !oldDir) {
-            UIManager.showStatus('请先选择两个目录', 'warning');
-            return;
-        }
-
-        // 先检查权限
-        const oldPerm = await window.API.checkDirectoryPermission(oldDir);
-        if (!oldPerm.hasPermission) {
-            UIManager.showStatus('旧版目录需要管理员权限，请右键以管理员身份运行程序', 'warning');
-            return;
-        }
-
-        // 更新新版
-        await this.handleUpdateFiles('new');
-        // 更新旧版
-        await this.handleUpdateFiles('old');
-    }
 };
 
 // 附加全局函数到 window
@@ -595,17 +581,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const tmpPath = await window.API.getTmpPath();
             console.log('TMP 路径:', tmpPath);
 
-            // 【调试版】打印详细路径信息
+            // 打印详细路径调试信息（仅控制台，不弹窗）
             try {
-                const debug = await window.appInfo.debugTmpPath();
-                console.log('=== TMP 路径调试信息 ===');
-                console.log('appData:', debug.appData);
-                console.log('tmpDir (TruckersMP):', debug.tmpDir);
-                console.log('installation:', debug.target);
-                console.log('appDataExists:', debug.appDataExists);
-                console.log('tmpDirExists:', debug.tmpDirExists);
-                console.log('installationExists:', debug.installationExists);
-                console.log('========================');
+                if (window.appInfo && typeof window.appInfo.debugTmpPath === 'function') {
+                    const debug = await window.appInfo.debugTmpPath();
+                    console.log('=== TMP 路径调试信息 ===');
+                    console.log('appData:', debug.appData);
+                    console.log('tmpDir (TruckersMP):', debug.tmpDir);
+                    console.log('installation:', debug.target);
+                    console.log('appDataExists:', debug.appDataExists);
+                    console.log('tmpDirExists:', debug.tmpDirExists);
+                    console.log('installationExists:', debug.installationExists);
+                    console.log('========================');
+                }
             } catch (e) {
                 console.error('调试信息获取失败:', e);
             }
@@ -618,7 +606,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } else {
                 console.warn('未检测到 TruckersMP 安装目录');
-                window.API.showMessage('未检测到 TruckersMP 安装目录，请手动选择目录。', 'warning');
+                // 使用页面内提示，避免弹出空白对话框
+                UIManager.showStatus('未检测到 TruckersMP 安装目录，请手动选择新版目录。', 'warning');
             }
         } catch (error) {
             console.error('获取 TMP 路径失败:', error);

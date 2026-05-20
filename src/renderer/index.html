@@ -12,7 +12,7 @@
         <div class="window-titlebar">
             <div class="window-title">
                 <span class="app-name">TMP更新工具</span>
-                <span class="version-badge" id="appVersion">v1.0</span>
+                <span class="version-badge" id="appVersion">v1.0.1</span>
             </div>
             <div class="window-controls">
                 <button class="control-btn" id="btnMinimize" title="最小化">
@@ -28,13 +28,6 @@
         </div>
 
         <div class="main-content">
-            <!-- 头部 -->
-            <div class="app-header">
-                <h1>TMP更新工具</h1>
-                <p class="subtitle">更新 TruckersMP 插件文件</p>
-                <div class="divider"></div>
-            </div>
-
             <!-- 目录设置卡片 -->
             <div class="card slide-up">
                 <div class="card-header">
@@ -46,32 +39,17 @@
                         </span>
                         目录设置
                     </div>
-                    <div class="status-indicator" id="appStatus">
-                        <span class="status-dot idle"></span>
-                        <span>就绪</span>
-                    </div>
-                </div>
-
-                <div class="alert-box alert-info">
-                    <span class="alert-icon">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <path d="M12 16v-4M12 8h.01"/>
-                        </svg>
-                    </span>
-                    <div>
-                        <strong>使用说明</strong><br/>
-                        • 先获取文件列表<br/>
-                        • 旧版目录需要管理员权限<br/>
-                        • 分别更新新版和旧版文件<br/>
-                    </div>
                 </div>
 
                 <div class="directory-section">
                     <div class="directory-item">
                         <div class="directory-label">
-                            <span>新版目录（用户目录）</span>
-                            <span class="badge new">推荐</span>
+                            <span class="dir-name">
+                                <svg class="dir-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20 6L9 17l-5-5"/>
+                                </svg>
+                                新版目录（用户目录）
+                            </span>
                         </div>
                         <div class="directory-input-group">
                             <input
@@ -92,7 +70,13 @@
 
                     <div class="directory-item">
                         <div class="directory-label">
-                            <span>旧版目录（系统目录）</span>
+                            <span class="dir-name">
+                                <svg class="dir-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                    <path d="M7 11V7a5 5 0 0110 0v4"/>
+                                </svg>
+                                旧版目录（系统目录）
+                            </span>
                             <span class="badge old">需管理员</span>
                         </div>
                         <div class="directory-input-group">
@@ -111,49 +95,70 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="action-buttons">
-                    <button class="btn-action btn-primary" id="btnGetFiles">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                            <polyline points="14,2 14,8 20,8"/>
-                            <line x1="16" y1="13" x2="8" y2="13"/>
-                            <line x1="16" y1="17" x2="8" y2="17"/>
-                        </svg>
-                        获取文件列表
-                    </button>
-
-                    <button class="btn-action btn-secondary" id="btnCheckPerm">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                            <path d="M7 11V7a5 5 0 0110 0v4"/>
-                        </svg>
-                        检查权限
-                    </button>
-
-                    <button class="btn-action btn-success" id="btnUpdateNew">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <!-- 大型操作按钮卡片 -->
+            <div class="action-cards slide-up">
+                <button class="action-card action-card-new" id="btnUpdateNew">
+                    <div class="action-card-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                            <polyline points="7,10 12,15 17,10"/>
+                            <polyline points="7 10 12 15 17 10"/>
                             <line x1="12" y1="15" x2="12" y2="3"/>
                         </svg>
-                        更新新版
-                    </button>
+                    </div>
+                    <div class="action-card-content">
+                        <div class="action-card-title">更新新版</div>
+                        <div class="action-card-desc">自动获取并更新用户目录</div>
+                    </div>
+                    <div class="action-card-arrow">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"/>
+                        </svg>
+                    </div>
+                </button>
 
-                    <button class="btn-action btn-warning" id="btnUpdateOld">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="23,4 23,10 17,10"/>
+                <button class="action-card action-card-old" id="btnUpdateOld">
+                    <div class="action-card-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10"/>
                             <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
                         </svg>
-                        更新旧版
-                    </button>
-
-                    <button class="btn-action btn-info" id="btnQuickUpdate">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polygon points="13,2 3,14 12,14 11,22 21,10 12,10 13,2"/>
+                    </div>
+                    <div class="action-card-content">
+                        <div class="action-card-title">更新旧版</div>
+                        <div class="action-card-desc">自动获取并更新系统目录</div>
+                    </div>
+                    <div class="action-card-arrow">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"/>
                         </svg>
-                        一键更新
-                    </button>
+                    </div>
+                </button>
+            </div>
+
+            <!-- 提示条（默认显示，更新时被状态消息替代） -->
+            <div class="tips-bar">
+                <div class="tip-item">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 12l2 2 4-4"/>
+                        <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    MD5 校验，仅下载有差异的文件
+                </div>
+                <div class="tip-item">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0110 0v4"/>
+                    </svg>
+                    旧版目录需以管理员身份运行
+                </div>
+                <div class="tip-item">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="13 17 18 12 13 7"/>
+                        <polyline points="6 17 11 12 6 7"/>
+                    </svg>
+                    点击按钮即开始自动更新
                 </div>
             </div>
 
@@ -161,42 +166,23 @@
             <div id="statusMessage" class="alert-box" style="display: none;"></div>
 
             <!-- 进度条 -->
-            <div id="progressSection" class="card progress-section" style="display: none;">
+            <div id="progressSection" class="progress-section" style="display: none;">
                 <div class="progress-header">
                     <span class="title">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="12" y1="20" x2="12" y2="10"/>
-                            <line x1="18" y1="20" x2="18" y2="4"/>
-                            <line x1="6" y1="20" x2="6" y2="16"/>
-                        </svg>
+                        <span class="progress-spinner"></span>
                         更新进度
                     </span>
-                    <span class="percent" id="progressPercent">0%</span>
+                    <span class="progress-count" id="progressCount">0 / 0</span>
                 </div>
-                <div id="currentFile" class="progress-status"></div>
                 <div class="progress-bar-container">
                     <div class="progress-bar-fill" id="progressBar" style="width: 0%"></div>
                 </div>
-            </div>
-
-            <!-- 文件列表 -->
-            <div id="fileListSection" class="file-list-section" style="display: none;">
-                <div class="file-list-header">
-                    <div class="card-title">
-                        <span class="icon">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
-                            </svg>
-                        </span>
-                        文件列表
-                    </div>
-                    <span class="file-count" id="fileCount">0 个文件</span>
-                </div>
-
-                <div id="fileListContainer" class="file-list-container">
-                    <!-- 文件列表将在这里动态生成 -->
+                <div class="progress-footer">
+                    <div id="currentFile" class="progress-status"></div>
+                    <span class="percent" id="progressPercent">0%</span>
                 </div>
             </div>
+
         </div>
 
         <!-- 底部版权 -->

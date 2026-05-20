@@ -1,6 +1,6 @@
 {
-  "name": "truckersmp-Update",
-  "version": "1.0.0",
+  "name": "truckersmp-update",
+  "version": "1.0.1",
   "description": "TMP更新工具",
   "main": "src/main/index.js",
   "scripts": {
@@ -24,7 +24,8 @@
   },
   "devDependencies": {
     "electron": "^28.3.3",
-    "electron-builder": "^24.9.1"
+    "electron-builder": "^24.9.1",
+    "electron-reloader": "^1.2.3"
   },
   "build": {
     "appId": "com.seven.tmpupdate",

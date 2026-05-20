@@ -11,9 +11,18 @@ try {
     }
 } catch (e) {}
 
-const { app } = require('electron');
+const { app, BrowserWindow, dialog } = require('electron');
 const { createWindow } = require('./window');
 const { setupIpcHandlers } = require('./handlers');
+
+// 开发模式热重载：源码改动时自动重启主进程 / 刷新渲染层
+// 仅在开发环境启用，打包后不会触发（require 失败则忽略）
+try {
+    require('electron-reloader')(module, {
+        debug: false,
+        watchRenderer: true
+    });
+} catch (_) {}
 
 // 应用准备就绪时创建窗口
 app.whenReady().then(() => {
