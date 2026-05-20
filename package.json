@@ -1,0 +1,51 @@
+{
+  "name": "truckersmp-Update",
+  "version": "1.0.0",
+  "description": "TMP更新工具",
+  "main": "src/main/index.js",
+  "scripts": {
+    "start": "chcp 65001 && electron .",
+    "dev": "chcp 65001 && electron .",
+    "build": "electron-builder",
+    "dist": "npm run build",
+    "rebuild": "npm run build"
+  },
+  "keywords": [
+    "truckersmp",
+    "update",
+    "electron",
+    "windows"
+  ],
+  "author": "Seven_TMP",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.6.2"
+  },
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.seven.tmpupdate",
+    "productName": "TMP更新工具",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "package.json",
+      "src/**/*",
+      "assets/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico",
+      "requestedExecutionLevel": "requireAdministrator"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": true
+    }
+  }
+}
